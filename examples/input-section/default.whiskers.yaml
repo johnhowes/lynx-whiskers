@@ -1,0 +1,10 @@
+firstNameSection#firstName: # No need to specify the inverse. The default is null.
+  label: "First Name"
+  firstName~input:
+    value: "{{{value}}}"
+    spec~inline: # This defines the spec as inline and not available to be pulled up.
+      validation:
+        required:
+          state: "{{{requiredState}}}"
+          message: requiredMessage
+  requiredMessage: "{{{requiredMessage}}}"

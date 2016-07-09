@@ -1,0 +1,16 @@
+banner~hint=header:
+  brand: Geek Squad
+  utilities:
+    - href: urls.foo
+      icon:
+        src: urls.images.foo
+        width: 24
+        height: 24
+main:
+  heading: "{{{count}}} Results Found"
+  results~#items: # Use the first one for children, unless the spec is inline.
+    - ~header: "Results"
+    - ~#each: # Use #items by default?
+        label: "{{{header}}}"
+        message: "{{{message}}}"
+    - ~: Copyright 2016

@@ -1,0 +1,20 @@
+{
+  "name": "lynx-whiskers",
+  "version": "1.0.0",
+  "description": "A template engine for building lynx documents.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "author": "John Howes",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
+    "mocha": "^2.5.3"
+  },
+  "dependencies": {
+    "handlebars": "^4.0.5",
+    "yamljs": "^0.2.8"
+  }
+}
