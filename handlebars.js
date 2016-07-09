@@ -50,15 +50,12 @@ function generateTextValue(node) {
   
   function getValue(node) {
     const literal = !!getWhisker(node, "literal");
-    let value;
     
     if (literal) {
-      value = node.value;
+      return node.value;
     } else {
-      value = JSON.stringify(node.value);
+      return JSON.stringify(node.value);
     }
-    
-    return tagValue(node, value);
   }
   
   if (node['~spec']) {
@@ -71,9 +68,7 @@ function generateTextValue(node) {
     output.push(getValue(node));
   }
   
-  output = output.join('');
-  
-  return output;
+  return output.join('');
 }
 
 function generateArrayValue(node) {
@@ -115,8 +110,11 @@ function generateObjectValue(node) {
   
   for (let p in node.value) {
     let child = node.value[p];
-    properties.push('"' + child.name + '": ' + generate(child));
+    let childOutput = generate(child);
+    properties.push('"' + child.name + '": ' + childOutput);
   }
+  
+  output.push(properties.join(','));
   
   if (hasSpec(node)) {
     if (properties.length > 0) output.push(',');

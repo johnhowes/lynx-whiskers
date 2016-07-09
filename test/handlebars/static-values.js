@@ -93,6 +93,7 @@ describe("static lynx generation", function () {
     it("should generate " + test.description, function () {
       var whiskersTemplate = whiskers.parse(test.source);
       var output = whiskers.generators.handlebars(whiskersTemplate);
+      
       var lynx = JSON.parse(output);
       lynx.should.deep.equal(test.expected);
     });
