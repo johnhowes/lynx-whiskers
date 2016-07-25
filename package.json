@@ -1,6 +1,6 @@
 {
   "name": "lynx-whiskers",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A template engine for building lynx documents.",
   "main": "index.js",
   "scripts": {

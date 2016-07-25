@@ -6,6 +6,31 @@ documents. Whiskers templates are [YAML](http://yaml.org/) documents that
 compile to [Handlebars](http://handlebarsjs.com/) templates, so they're 
 supported on every platform that supports Handlebars.
 
+### To Do
+
+~infer-hints=false: Something to turn off inference.
+
+### Installation
+
+To install the `whiskers` command-line tool:
+
+```
+npm install -g lynx-whiskers
+```
+
+To install locally, for integration into your build process:
+
+```
+npm install lynx-whiskers --save-dev
+```
+
+#### Commands
+
+After global installation, you should have access to the `whiskers` command, which provides the following features:
+
+| -c or --compile | Compile a file or set of whiskers files into handlebars templates. |
+| -o or --output  | Specify the root output directory. The source folder structure will be maintained. By default, the output files will be placed alongside the source files. |
+
 ### Hello, World!
 
 This is a simple text document.
