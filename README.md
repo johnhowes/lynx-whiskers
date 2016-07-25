@@ -24,12 +24,54 @@ To install locally, for integration into your build process:
 npm install lynx-whiskers --save-dev
 ```
 
-#### Commands
+### Whiskers Commands
 
-After global installation, you should have access to the `whiskers` command, which provides the following features:
+After global installation, you should have access to the `whiskers` command, 
+which provides the following features:
 
+| Command | Description |
+|-------------|-------------|
 | -c or --compile | Compile a file or set of whiskers files into handlebars templates. |
 | -o or --output  | Specify the root output directory. The source folder structure will be maintained. By default, the output files will be placed alongside the source files. |
+| -w or --watch | Watch the source files and recompile when a file changes. |
+| -s or --serve | Serve static documents generated with sample data. |
+
+#### Examples
+
+To create a handlebars template alongside each `.whiskers` file in your source
+tree:
+
+```
+whiskers -c
+
+or 
+
+whiskers -c /src
+```
+
+To build an output tree in an alternate directory:
+
+```
+whiskers -c /src -o /out
+```
+
+To compile a single whiskers file:
+
+```
+whiskers -c /src/index.whiskers
+```
+
+### Configuration
+
+To configure the the whiskers command-line tool, run it from a directory that contains
+a `whiskers.json`, `whiskers.yaml`, or `whiskers.yml` configuration file. You can
+configure the following options:
+
+| Option | Description | 
+|--------|-------------|
+| src | The root source directory. | 
+| out | The root output directory. |
+| realm | The root content realm of the application. |
 
 ### Hello, World!
 
