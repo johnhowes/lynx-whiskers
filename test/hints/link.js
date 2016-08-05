@@ -4,7 +4,6 @@ var should = chai.should();
 chai.use(chaiAsPromised);
 var whiskers = require("../../");
 var util = require("../util");
-var YAML = require("yamljs");
 
 describe("link", function () {
   var tests = [

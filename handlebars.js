@@ -1,3 +1,5 @@
+/* jshint node: true */
+/* jshint esversion: 6 */
 "use strict";
 
 let util = require('util');
@@ -95,7 +97,7 @@ function generateTextValue(node) {
   }
   
   if (hasSpec(node)) {
-    output.push('{')
+    output.push('{');
     output.push('"value": ' + getValue(node) + '');
     output.push(',');
     output.push('"spec": ' + JSON.stringify(node['~spec']));

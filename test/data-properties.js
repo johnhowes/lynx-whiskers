@@ -4,7 +4,6 @@ var should = chai.should();
 chai.use(chaiAsPromised);
 var whiskers = require("../");
 var util = require("./util");
-var YAML = require("yamljs");
 
 describe("data properties", function () {
   it("should not create a spec for a value described by ~data", function () {

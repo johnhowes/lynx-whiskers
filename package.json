@@ -1,20 +1,29 @@
 {
   "name": "lynx-whiskers",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A template engine for building lynx documents.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test"
+    "test": "mocha test",
+    "lint": "jshint *.js --exclude-path /node_modules/**",
+    "pretest": "npm run lint"
   },
   "author": "John Howes",
   "license": "ISC",
+  "bin": {
+    "whiskers": "./cli.js"
+  },
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
     "mocha": "^2.5.3"
   },
   "dependencies": {
+    "commander": "^2.9.0",
+    "glob": "^7.0.5",
     "handlebars": "^4.0.5",
+    "koa": "^1.2.1",
+    "opener": "^1.4.1",
     "yamljs": "^0.2.8"
   }
 }

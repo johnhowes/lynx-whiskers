@@ -1,3 +1,5 @@
+/* jshint node: true */
+/* jshint esversion: 6 */
 "use strict";
 
 let util = require("util");
@@ -19,6 +21,7 @@ function* filter(iterable, predicate) {
 }
 
 function* iterate() {
+  /*jshint validthis:true */
   yield this;
   
   if (this.value && util.isObject(this.value)) {
@@ -56,9 +59,11 @@ function parse(name, value) {
   if (name) {
     if (name.indexOf("~") === -1) propertyName = name;
     else {
-      while (match = namePattern.exec(name)) {
+      match = namePattern.exec(name);
+      while (match) {
         if (match[1]) propertyName = match[1];
         if (match[2]) whiskers.push(parseWhisker(match[2]));
+        match = namePattern.exec(name);
       }
     }
   }
@@ -149,11 +154,14 @@ addHandler(function handleHintWhisker(doc) {
   }
 });
 
-addHandler(function handleHintsWhisker(doc) {
+addHandler(function handleHintsWhisker(doc) {  
+  function addHintToNode(node) {
+    return (h) => node.spec.hints.push(h);
+  }
   for (let node of nodesAndTemplates(doc)) {
     for (let whisker of node.whiskers) {
       if (whisker.key === "hints") {
-        whisker.value.split(",").forEach((h) => node.spec.hints.push(h));
+        whisker.value.split(",").forEach(addHintToNode(node));
       }
     }
   }

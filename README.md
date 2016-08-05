@@ -1,16 +1,13 @@
 Lynx Whiskers
------------------------------------------------------------
+=======================================================
 
-Lynx Whiskers is a simple, concise template language for writing [lynx](./lynx-spec.pdf) 
+Lynx Whiskers is a template language for writing [lynx](./lynx-spec.pdf) 
 documents. Whiskers templates are [YAML](http://yaml.org/) documents that 
 compile to [Handlebars](http://handlebarsjs.com/) templates, so they're 
 supported on every platform that supports Handlebars.
 
-### To Do
-
-~infer-hints=false: Something to turn off inference.
-
-### Installation
+Installation
+------------------------------------------------------
 
 To install the `whiskers` command-line tool:
 
@@ -18,60 +15,14 @@ To install the `whiskers` command-line tool:
 npm install -g lynx-whiskers
 ```
 
-To install locally, for integration into your build process:
+To install locally:
 
 ```
 npm install lynx-whiskers --save-dev
 ```
 
-### Whiskers Commands
-
-After global installation, you should have access to the `whiskers` command, 
-which provides the following features:
-
-| Command | Description |
-|-------------|-------------|
-| -c or --compile | Compile a file or set of whiskers files into handlebars templates. |
-| -o or --output  | Specify the root output directory. The source folder structure will be maintained. By default, the output files will be placed alongside the source files. |
-| -w or --watch | Watch the source files and recompile when a file changes. |
-| -s or --serve | Serve static documents generated with sample data. |
-
-#### Examples
-
-To create a handlebars template alongside each `.whiskers` file in your source
-tree:
-
-```
-whiskers -c
-
-or 
-
-whiskers -c /src
-```
-
-To build an output tree in an alternate directory:
-
-```
-whiskers -c /src -o /out
-```
-
-To compile a single whiskers file:
-
-```
-whiskers -c /src/index.whiskers
-```
-
-### Configuration
-
-To configure the the whiskers command-line tool, run it from a directory that contains
-a `whiskers.json`, `whiskers.yaml`, or `whiskers.yml` configuration file. You can
-configure the following options:
-
-| Option | Description | 
-|--------|-------------|
-| src | The root source directory. | 
-| out | The root output directory. |
-| realm | The root content realm of the application. |
+Templates
+-----------------------------------------------------
 
 ### Hello, World!
 
@@ -777,3 +728,154 @@ The result:
   }
 }
 ```
+
+### Layouts and Partials
+
+Use layouts and partials for reusable template components. Both layout and
+partial files must begin with a '~' prefix.
+
+#### Layouts
+
+The following layout includes three zones: a banner, a main content zone, and
+a footer.
+
+```YAML
+banner~zone: Lynx Whiskers
+main~zone: null
+footer~zone: Copyright © John Howes, 2016
+```
+
+The following template references the `site` layout and replaces its `main` content,
+leaving the default banner and footer intact. The `main` content zone is replaced
+simply by providing a main property.
+
+```YAML
+~layout=site:
+  main~section: 
+    header~header~label: Welcome
+```
+
+This is the equivalent of the following complete template:
+
+```YAML
+banner: Lynx Whiskers
+main~section: 
+  header~header~label: Welcome
+footer: Copyright © John Howes, 2016
+```
+
+##### Layout Naming and Location
+
+Layout files have a `~` prefix and live in a `~layouts` folder anywhere in the 
+app file system. Templates reference them by name and they're found in the 
+nearest `~layouts` folder (starting in the referencing template directory 
+and searching all ancestors until a match is found).
+
+> In the previous example, we would have searched through the template's ancestor 
+> tree looking for the file `~layouts/~site.whiskers`.
+
+#### Partials
+
+The following template references the `input-group` partial to simplify
+building a form:
+
+```YAML
+~form~labeledBy=header:
+  header~header~label: Edit User Information
+  firstNameGroup~partial=input-group:
+    label: First Name
+    name: firstName
+  middleNameGroup~partial=input-group:
+    label: Middle Name
+    name: middleName
+  lastNameGroup~partial=input-group:
+    label: Last Name
+    name: lastName
+```
+
+The `label` and `name` values are parameters passed to the partial. Internally,
+they're referenced with a `~~` prefix:
+
+```YAML
+~#~~name~section~labeledBy=label:
+  label~header~label: ~~label
+  ~~name: 
+    value: "{{{value}}}"
+    spec:
+      validation:
+        required~#required:
+          invalid: requiredInvalidMessage
+        text~#constraints:
+          minLength: "{{{minLength}}}"
+          maxLength: "{{{maxLength}}}"
+          pattern: "{{{pattern}}}"
+          format: "{{{format}}}"
+          invalid: textInvalidMessage
+  requiredInvalidMessage~#required: Required
+  textInvalidMessage~#constraints: Invalid
+```
+
+The result:
+
+```YAML
+~form~labeledBy=header:
+  header~header~label: Edit User Information
+  firstNameGroup~#firstName~section~labeledBy=label:
+    label~header~label: First Name
+    firstName: 
+      value: "{{{value}}}"
+      spec:
+        validation:
+          required~#required:
+            invalid: requiredInvalidMessage
+          text~#constraints:
+            minLength: "{{{minLength}}}"
+            maxLength: "{{{maxLength}}}"
+            pattern: "{{{pattern}}}"
+            format: "{{{format}}}"
+            invalid: textInvalidMessage
+    requiredInvalidMessage~#required: Required
+    textInvalidMessage~#constraints: Invalid
+  middleNameGroup~#middleName~section~labeledBy=label:
+    label~header~label: Middle Name
+    middleName: 
+      value: "{{{value}}}"
+      spec:
+        validation:
+          required~#required:
+            invalid: requiredInvalidMessage
+          text~#constraints:
+            minLength: "{{{minLength}}}"
+            maxLength: "{{{maxLength}}}"
+            pattern: "{{{pattern}}}"
+            format: "{{{format}}}"
+            invalid: textInvalidMessage
+    requiredInvalidMessage~#required: Required
+    textInvalidMessage~#constraints: Invalid
+  lastNameGroup~#lastName~section~labeledBy=label:
+    label~header~label: Last Name
+    lastName: 
+      value: "{{{value}}}"
+      spec:
+        validation:
+          required~#required:
+            invalid: requiredInvalidMessage
+          text~#constraints:
+            minLength: "{{{minLength}}}"
+            maxLength: "{{{maxLength}}}"
+            pattern: "{{{pattern}}}"
+            format: "{{{format}}}"
+            invalid: textInvalidMessage
+    requiredInvalidMessage~#required: Required
+    textInvalidMessage~#constraints: Invalid
+```
+
+##### Partial Naming and Location
+
+Partial files have a `~` prefix and live in a `~partials` folder anywhere in the 
+app file system. Templates reference them by name and they're found in the 
+nearest `~partials` folder (starting in the referencing template directory 
+and searching all ancestors until a match is found).
+
+> In the previous example, we would have searched through the template's ancestor 
+> tree looking for the file `~partials/~input-group.whiskers`.
