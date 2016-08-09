@@ -729,52 +729,7 @@ The result:
 }
 ```
 
-### Layouts and Partials
-
-Use layouts and partials for reusable template components. Both layout and
-partial files must begin with a '~' prefix.
-
-#### Layouts
-
-The following layout includes three zones: a banner, a main content zone, and
-a footer.
-
-```YAML
-banner~zone: Lynx Whiskers
-main~zone: null
-footer~zone: Copyright © John Howes, 2016
-```
-
-The following template references the `site` layout and replaces its `main` content,
-leaving the default banner and footer intact. The `main` content zone is replaced
-simply by providing a main property.
-
-```YAML
-~layout=site:
-  main~section: 
-    header~header~label: Welcome
-```
-
-This is the equivalent of the following complete template:
-
-```YAML
-banner: Lynx Whiskers
-main~section: 
-  header~header~label: Welcome
-footer: Copyright © John Howes, 2016
-```
-
-##### Layout Naming and Location
-
-Layout files have a `~` prefix and live in a `~layouts` folder anywhere in the 
-app file system. Templates reference them by name and they're found in the 
-nearest `~layouts` folder (starting in the referencing template directory 
-and searching all ancestors until a match is found).
-
-> In the previous example, we would have searched through the template's ancestor 
-> tree looking for the file `~layouts/~site.whiskers`.
-
-#### Partials
+### Partial Templates
 
 The following template references the `input-group` partial to simplify
 building a form:
@@ -782,21 +737,23 @@ building a form:
 ```YAML
 ~form~labeledBy=header:
   header~header~label: Edit User Information
-  firstNameGroup~partial=input-group:
+  firstNameGroup~include=input-group:
     label: First Name
     name: firstName
-  middleNameGroup~partial=input-group:
+  middleNameGroup~include=input-group:
     label: Middle Name
     name: middleName
-  lastNameGroup~partial=input-group:
+  lastNameGroup~include=input-group:
     label: Last Name
     name: lastName
 ```
 
-The `label` and `name` values are parameters passed to the partial. Internally,
-they're referenced with a `~~` prefix:
+The `label` and `name` values are parameters passed to the partial. In the
+partial template, these parameters are identified with a `~~` prefix and will
+be replaced with the parameter values.
 
 ```YAML
+# ~partials/~input-group.whiskers
 ~#~~name~section~labeledBy=label:
   label~header~label: ~~label
   ~~name: 
@@ -806,10 +763,10 @@ they're referenced with a `~~` prefix:
         required~#required:
           invalid: requiredInvalidMessage
         text~#constraints:
-          minLength: "{{{minLength}}}"
-          maxLength: "{{{maxLength}}}"
-          pattern: "{{{pattern}}}"
-          format: "{{{format}}}"
+          minLength~#minLength: "{{{minLength}}}"
+          maxLength~#maxLength: "{{{maxLength}}}"
+          pattern~#pattern: "{{{pattern}}}"
+          format~#format: "{{{format}}}"
           invalid: textInvalidMessage
   requiredInvalidMessage~#required: Required
   textInvalidMessage~#constraints: Invalid
@@ -829,10 +786,10 @@ The result:
           required~#required:
             invalid: requiredInvalidMessage
           text~#constraints:
-            minLength: "{{{minLength}}}"
-            maxLength: "{{{maxLength}}}"
-            pattern: "{{{pattern}}}"
-            format: "{{{format}}}"
+            minLength~#minLength: "{{{minLength}}}"
+            maxLength~#maxLength: "{{{maxLength}}}"
+            pattern~#pattern: "{{{pattern}}}"
+            format~#format: "{{{format}}}"
             invalid: textInvalidMessage
     requiredInvalidMessage~#required: Required
     textInvalidMessage~#constraints: Invalid
@@ -845,10 +802,10 @@ The result:
           required~#required:
             invalid: requiredInvalidMessage
           text~#constraints:
-            minLength: "{{{minLength}}}"
-            maxLength: "{{{maxLength}}}"
-            pattern: "{{{pattern}}}"
-            format: "{{{format}}}"
+            minLength~#minLength: "{{{minLength}}}"
+            maxLength~#maxLength: "{{{maxLength}}}"
+            pattern~#pattern: "{{{pattern}}}"
+            format~#format: "{{{format}}}"
             invalid: textInvalidMessage
     requiredInvalidMessage~#required: Required
     textInvalidMessage~#constraints: Invalid
@@ -861,21 +818,51 @@ The result:
           required~#required:
             invalid: requiredInvalidMessage
           text~#constraints:
-            minLength: "{{{minLength}}}"
-            maxLength: "{{{maxLength}}}"
-            pattern: "{{{pattern}}}"
-            format: "{{{format}}}"
+            minLength~#minLength: "{{{minLength}}}"
+            maxLength~#maxLength: "{{{maxLength}}}"
+            pattern~#pattern: "{{{pattern}}}"
+            format~#format: "{{{format}}}"
             invalid: textInvalidMessage
     requiredInvalidMessage~#required: Required
     textInvalidMessage~#constraints: Invalid
 ```
 
-##### Partial Naming and Location
+#### Partial Naming and Location
 
 Partial files have a `~` prefix and live in a `~partials` folder anywhere in the 
-app file system. Templates reference them by name and they're found in the 
+app file system. Referenced by name, they're found in the 
 nearest `~partials` folder (starting in the referencing template directory 
 and searching all ancestors until a match is found).
 
 > In the previous example, we would have searched through the template's ancestor 
 > tree looking for the file `~partials/~input-group.whiskers`.
+
+#### Layouts
+
+Partial templates can also be used to reuse common layouts. The following partial 
+includes three zones: a banner, a main content zone, and a footer.
+
+```YAML
+# /~partials/~site-layout.whiskers
+banner~zone: Lynx Whiskers
+main~zone: null
+footer~zone: Copyright © John Howes, 2016
+```
+
+The following template includes the `site-layout` and replaces its `main`
+zone, leaving the default banner and footer intact.
+
+```YAML
+~include=site-layout:
+  main~section: 
+    header~header~label: Welcome
+```
+
+The result:
+
+```YAML
+banner: Lynx Whiskers
+main~section: 
+  header~header~label: Welcome
+footer: Copyright © John Howes, 2016
+```
