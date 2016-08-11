@@ -7,6 +7,7 @@ let handlers = [];
 let namePattern = /([^~]*)?([~]+[^~]*)/g;
 let whiskerPattern = /^~([^=]*)=?(.*)/;
 let baseHints = [ "text", "container", "form", "submit", "link", "content" ];
+let YAML = require("yamljs");
 
 let addHandler = (fn) => handlers.push(fn);
 let hasBaseHint = (node) => node.spec.hints.some((h) => baseHints.indexOf(h) !== -1);
@@ -126,7 +127,7 @@ function handleHintShorthand(result, hint) {
   }
 }
 
-module.exports = exports = function parseWhiskers(source) {
+function parseWhiskers(source) {
   let output = parse(null, source);
   
   for (let handler of handlers) {
@@ -134,7 +135,32 @@ module.exports = exports = function parseWhiskers(source) {
   }
   
   return output;
-};
+}
+
+module.exports = exports = parseWhiskers;
+
+addHandler(function includePartials(doc) {
+  for (let node of doc) {
+    for (let whisker of node.whiskers) {
+      if (whisker.key === "include") {
+        var partialTemplate = parseWhiskers.resolvePartial(whisker.value);
+
+        // Replace ~~ parameters
+        for (let p in node.value) {
+          if (node.value[p].value) {
+            partialTemplate = partialTemplate.replace("~~" + p, node.value[p].value);
+          }
+        }
+        
+        // Replace node with partial
+        var partialDocument = parseWhiskers(YAML.parse(partialTemplate));
+        for (let p in partialDocument) {
+          node[p] = partialDocument[p];
+        }
+      }
+    }
+  }
+});
 
 addHandler(function addSpecIfNoneSpecified(doc) {
   for (let node of nodesAndTemplates(doc)) {

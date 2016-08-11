@@ -6,6 +6,7 @@ require("./build-spec");
 require("./data-properties");
 require("./templates");
 require("./handlebars");
+require("./partials");
 
 describe("TODO", function () {
   it("should describe layouts");

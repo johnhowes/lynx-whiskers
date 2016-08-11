@@ -837,7 +837,7 @@ and searching all ancestors until a match is found).
 > In the previous example, we would have searched through the template's ancestor 
 > tree looking for the file `~partials/~input-group.whiskers`.
 
-#### Layouts
+#### Partials as Layouts
 
 Partial templates can also be used to reuse common layouts. The following partial 
 includes three zones: a banner, a main content zone, and a footer.
