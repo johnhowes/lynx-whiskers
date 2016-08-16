@@ -306,6 +306,27 @@ addHandler(function handleVisibility(doc) {
   }
 });
 
+addHandler(function handleEmphasis(doc) {
+  for (let node of nodesAndTemplates(doc)) {
+    for (let whisker of node.whiskers) {
+      if (whisker.key === "emphasis") {
+        node.spec.emphasis = +whisker.value;
+        break;
+      }
+      
+      if (whisker.key === "em") {
+        node.spec.emphasis = 1;
+        break;
+      }
+      
+      if (whisker.key === "strong") {
+        node.spec.emphasis = 2;
+        break;
+      }
+    }
+  }
+});
+
 addHandler(function handleLabeledBy(doc) {
   for (let node of nodesAndTemplates(doc)) {
     for (let whisker of node.whiskers) {

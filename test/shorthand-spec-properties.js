@@ -53,6 +53,21 @@ describe("shorthand", function () {
       expectation: (node) => node.spec.visibility === "visible",
       expected: "spec.visibility=visible"
     }, {
+      whiskers: "~emphasis=1",
+      value: null,
+      expectation: (node) => node.spec.emphasis === 1,
+      expected: "spec.emphasis=1"
+    }, {
+      whiskers: "~em",
+      value: null,
+      expectation: (node) => node.spec.emphasis === 1,
+      expected: "spec.emphasis=1"
+    }, {
+      whiskers: "~strong",
+      value: null,
+      expectation: (node) => node.spec.emphasis === 2,
+      expected: "spec.emphasis=2"
+    }, {
       whiskers: "~labeledBy=firstNameLabel",
       value: null,
       expectation: (node) => node.spec.labeledBy === "firstNameLabel",

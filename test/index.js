@@ -14,4 +14,5 @@ describe("TODO", function () {
   it("should describe markdown shorthand");
   it("should allow templated property names");
   it("should allow easy creation of container inputs");
+  it("should describe emphasis");
 });
