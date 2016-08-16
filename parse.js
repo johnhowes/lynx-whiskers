@@ -15,6 +15,14 @@ let hasHint = (node, hint) => node.spec && node.spec.hints && node.spec.hints.so
 let hasNoBaseHint = (node) => !hasBaseHint(node);
 let isDataProperty = (node) => !node.spec;
 
+function hasWhisker(key) {
+  return function (node) {
+    for (let whisker of node.whiskers) {
+      if (whisker.key === "zone") return true;
+    }
+  };
+}
+
 function* filter(iterable, predicate) {
   for (let r of iterable) {
     if (predicate(r)) yield r;
@@ -152,8 +160,18 @@ addHandler(function includePartials(doc) {
           }
         }
         
-        // Replace node with partial
+        // Replace zone parameters
         var partialDocument = parseWhiskers(YAML.parse(partialTemplate));
+        for (let zone of filter(partialDocument, hasWhisker("zone"))) {
+          var content = node.value[zone.name];
+          if (content) {
+            for (let p in content) {
+              zone[p] = content[p];
+            }
+          }
+        }
+        
+        // Replace node with partial
         for (let p in partialDocument) {
           node[p] = partialDocument[p];
         }

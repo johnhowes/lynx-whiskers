@@ -60,6 +60,25 @@ describe("partial templates", function () {
     result.spec.hints[0].should.equal("text");
   });
   
+  it("should apply ~~ parameters to a partial template", function () {
+    var doc = {
+      "~include=message": {
+        name: "Jim"
+      }
+    };
+    
+    var message = "Hello, ~~name";
+    
+    function resolvePartial(name) {
+      if (name === "message") return message;
+    }
+    
+    whiskers.parse.resolvePartial = resolvePartial;
+    var result = whiskers.parse(doc);
+    result.value.should.equal("Hello, Jim");
+    result.spec.hints[0].should.equal("text");
+  });
+  
   it("should include a nested partial", function () {
     var doc = {
       "~include=welcome": null
@@ -81,5 +100,27 @@ describe("partial templates", function () {
     var result = whiskers.parse(doc);
     result.value.should.equal("Welcome!");
     result.spec.hints[0].should.equal("text");
+  });
+  
+  it("should include a layout partial with zones", function () {
+    var doc = {
+      "~include=site-layout": {
+        "message": "Welcome"
+      }
+    };
+    
+    var siteLayout = {
+      "header": "Site Layout",
+      "message~zone": null
+    };
+    
+    function resolvePartial(name) {
+      if (name === "site-layout") return YAML.stringify(siteLayout);
+    }
+    
+    whiskers.parse.resolvePartial = resolvePartial;
+    var result = whiskers.parse(doc);
+    result.value.header.value.should.equal("Site Layout");
+    result.value.message.value.should.equal("Welcome");
   });
 });

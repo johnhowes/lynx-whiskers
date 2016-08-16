@@ -424,6 +424,26 @@ Or with shorthand:
 ~concealed: "secret"
 ```
 
+### Emphasis
+
+Describe emphasis with the `~emphasis` whisker:
+
+```YAML
+~emphasis=3: "This is Important!"
+```
+
+Or with the shorthand values `~em` and `~strong`:
+
+```YAML
+~em: "This is slightly emphatic"
+```
+
+```YAML
+~strong: "This is very emphatic"
+```
+
+> `~em` maps to `~emphasis=1` and `~strong` maps to `~emphasis=2`.
+
 ### Options
 
 Reference input options with the `~options` and `~option` whiskers:
@@ -731,8 +751,7 @@ The result:
 
 ### Partial Templates
 
-The following template references the `input-group` partial to simplify
-building a form:
+The following template references the `input-group` partial:
 
 ```YAML
 ~form~labeledBy=header:
@@ -839,7 +858,7 @@ and searching all ancestors until a match is found).
 
 #### Partials as Layouts
 
-Partial templates can also be used to reuse common layouts. The following partial 
+Partial templates can also be used for document layout. The following partial 
 includes three zones: a banner, a main content zone, and a footer.
 
 ```YAML
