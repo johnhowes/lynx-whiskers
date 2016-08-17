@@ -429,7 +429,7 @@ Or with shorthand:
 Describe emphasis with the `~emphasis` whisker:
 
 ```YAML
-~emphasis=3: "This is Important!"
+~emphasis=3: "This is really Important!"
 ```
 
 Or with the shorthand values `~em` and `~strong`:

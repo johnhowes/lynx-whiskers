@@ -146,6 +146,7 @@ function parseWhiskers(source) {
 }
 
 module.exports = exports = parseWhiskers;
+exports.resolvePartial = () => null;
 
 addHandler(function includePartials(doc) {
   for (let node of doc) {

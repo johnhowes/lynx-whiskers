@@ -74,7 +74,7 @@ glob(sourcePath, (err, files) => {
 });
 
 if (program.serve) {
-  var server = require("./server").serve(4617);
+  var server = require("./lib/server").serve(4617);
   opener("http://localhost:4617");
   
   return server;

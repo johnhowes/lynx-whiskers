@@ -15,4 +15,5 @@ describe("TODO", function () {
   it("should allow templated property names");
   it("should allow easy creation of container inputs");
   it("should describe emphasis");
+  it("should make it easy to pull a partial into a data uri to optimize links");
 });
