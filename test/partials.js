@@ -214,5 +214,15 @@ describe("partial templates", function () {
     whiskers.parse.resolvePartial = resolvePartial;
     var result = whiskers.parse(doc);
     should.not.exist(result.value.hello["~spec"]);
+    
+    // But the document that includes the partial should still get a doc spec.
+    doc = {
+      "~include=site-layout": {
+        "main": "Hello"
+      }
+    }
+    
+    result = whiskers.parse(doc);
+    should.exist(result["~spec"]);
   });
 });

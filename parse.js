@@ -489,7 +489,7 @@ addHandler(function includePartials(doc) {
         
         // Replace node with partial
         for (let p in partialDocument) {
-          if (p === "name") continue;
+          if (p === "name" || p === "options") continue;
           node[p] = partialDocument[p];
         }
         
