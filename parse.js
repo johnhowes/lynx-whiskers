@@ -2,12 +2,14 @@
 /* jshint esversion: 6 */
 "use strict";
 
-let util = require("util");
-let handlers = [];
-let namePattern = /([^~]*)?([~]+[^~]*)/g;
-let whiskerPattern = /^~([^=]*)=?(.*)/;
-let baseHints = [ "text", "container", "form", "submit", "link", "content" ];
-let YAML = require("yamljs");
+const util = require("util");
+const handlers = [];
+const namePattern = /([^~]*)?([~]+[^~]*)/g;
+const whiskerPattern = /^~([^=]*)=?(.*)/;
+const baseHints = [ "text", "container", "form", "submit", "link", "content" ];
+const YAML = require("yamljs");
+const path = require("path");
+const fs = require("fs");
 
 let addHandler = (fn) => handlers.push(fn);
 let hasBaseHint = (node) => node.spec.hints.some((h) => baseHints.indexOf(h) !== -1);
@@ -135,51 +137,44 @@ function handleHintShorthand(result, hint) {
   }
 }
 
-function parseWhiskers(source) {
-  let output = parse(null, source);
+function parseWhiskers(source, options) {
+  let doc = parse(null, source);
+  doc.options = options || {};
   
   for (let handler of handlers) {
-    handler(output);
+    handler(doc);
   }
   
-  return output;
+  return doc;
 }
 
 module.exports = exports = parseWhiskers;
-exports.resolvePartial = () => null;
 
-addHandler(function includePartials(doc) {
-  for (let node of doc) {
-    for (let whisker of node.whiskers) {
-      if (whisker.key === "include") {
-        var partialTemplate = parseWhiskers.resolvePartial(whisker.value);
-
-        // Replace ~~ parameters
-        for (let p in node.value) {
-          if (node.value[p].value) {
-            partialTemplate = partialTemplate.replace("~~" + p, node.value[p].value);
-          }
-        }
-        
-        // Replace zone parameters
-        var partialDocument = parseWhiskers(YAML.parse(partialTemplate));
-        for (let zone of filter(partialDocument, hasWhisker("zone"))) {
-          var content = node.value[zone.name];
-          if (content) {
-            for (let p in content) {
-              zone[p] = content[p];
-            }
-          }
-        }
-        
-        // Replace node with partial
-        for (let p in partialDocument) {
-          node[p] = partialDocument[p];
-        }
-      }
-    }
+exports.resolvePartial = (name, options) => {
+  if (!options) {
+    console.log(name);
+    return;
   }
-});
+  
+  var directory = path.dirname(options.location);
+  
+  while (directory) {
+    var partialLocation = path.join(directory, "~partials", "~" + name + ".whiskers");
+    
+    try {
+      fs.accessSync(partialLocation);
+      return {
+        name: name,
+        data: fs.readFileSync(partialLocation),
+        location: partialLocation
+      };
+    } catch(e) { }
+    
+    directory = path.dirname(directory);
+  }
+  
+  throw new Error("Failed to resolve partial " + name);
+};
 
 addHandler(function addSpecIfNoneSpecified(doc) {
   for (let node of nodesAndTemplates(doc)) {
@@ -462,6 +457,48 @@ function buildChildrenSpec(node) {
   return childrenSpec;
 }
 
+addHandler(function includePartials(doc) {
+  for (let node of doc) {
+    for (let whisker of node.whiskers) {
+      if (whisker.key === "include") {
+        let partialTemplate = parseWhiskers.resolvePartial(whisker.value, doc.options);
+        if (!partialTemplate) continue; // throw new Error("Failed to locate partial " + whisker.value);
+        
+        let partialContents = partialTemplate.data.toString();
+
+        // Replace ~~ parameters
+        for (let p in node.value) {
+          if (node.value[p].value) {
+            partialContents = partialContents.replace("~~" + p, node.value[p].value);
+          }
+        }
+        
+        // Replace zone parameters
+        let partialDocument = parseWhiskers(YAML.parse(partialContents), {
+          location: partialTemplate.location,
+          isPartial: true
+        });
+        for (let zone of filter(partialDocument, hasWhisker("zone"))) {
+          let content = node.value[zone.name];
+          if (content) {
+            for (let p in content) {
+              zone[p] = content[p];
+            }
+          }
+        }
+        
+        // Replace node with partial
+        for (let p in partialDocument) {
+          if (p === "name") continue;
+          node[p] = partialDocument[p];
+        }
+        
+        node.spec.name = node.name;
+      }
+    }
+  }
+});
+
 function buildSpec(node) {
   let spec = JSON.parse(JSON.stringify(node.spec));
   
@@ -474,6 +511,8 @@ function buildSpec(node) {
 }
 
 addHandler(function buildSpecs(doc) {
+  if (doc.options.isPartial) return;
+  
   doc['~spec'] = buildSpec(doc);
   
   for (let nodeWithInlineSpec of filter(nodesAndTemplates(doc), (node) => node !== doc && node.inlineSpec)) {

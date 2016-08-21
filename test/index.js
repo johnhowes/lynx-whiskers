@@ -16,4 +16,12 @@ describe("TODO", function () {
   it("should allow easy creation of container inputs");
   it("should describe emphasis");
   it("should make it easy to pull a partial into a data uri to optimize links");
+  it("should allow me to specify another template based on a state (e.g. the form on 400 error)");
+  it("should describe the server");
+  it("should parse index.whiskers when there are no state docs");
+  // Let the state drive the template selection rather than vice-versa
+  // folder ~states
+    // ~states/default.yml
+    //    .template: "default" (optional)
+    //    .template: "../default" (form at another level)
 });
