@@ -258,6 +258,32 @@ describe("dynamic lynx generation with handlebars", function () {
         }
       }
     }, {
+      description: "section object with an implicit null inverse",
+      source: {
+        "~#people": {
+          firstName: "{{{firstName}}}",
+          lastName: "{{{lastName}}}"
+        }
+      },
+      data: {
+        people: null
+      },
+      expected: {
+        value: null,
+        spec: {
+          hints: [ "container" ],
+          children: [
+            {
+              name: "firstName",
+              hints: [ "text" ]
+            }, {
+              name: "lastName",
+              hints: [ "text" ]
+            }
+          ]
+        }
+      }
+    }, {
       description: "inline section object with an inline inverse",
       source: {
         "~#people~inline": {

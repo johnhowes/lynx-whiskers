@@ -176,6 +176,37 @@ exports.resolvePartial = (name, options) => {
   throw new Error("Failed to resolve partial " + name);
 };
 
+addHandler(function addImplicitNullInverse(doc) {
+  for (let node of doc) {
+    let sections = 0, inverses = 0, inline = 0;
+    let section;
+    for (let whisker of node.whiskers) {
+      if (whisker.key.indexOf("#") === 0) {
+        section = whisker.key;
+        sections += 1;
+      }
+      if (whisker.key === "inline") inline += 1;
+      if (whisker.key.indexOf("^") === 0) inverses += 1;
+    }
+    
+    for (let template of node.templates) {
+      for (let whisker of template.whiskers) {
+        if (whisker.key.indexOf("#") === 0) {
+          section = whisker.key;
+          sections += 1;
+        }
+        if (whisker.key === "inline") inline += 1;
+        if (whisker.key.indexOf("^") === 0) inverses += 1;
+      }
+    }
+    
+    if (sections === 1 && inverses === 0 && inline === 0) {
+      let nullInverseTemplate = parse("~" + section.replace("#", "^"), null);
+      node.templates.push(nullInverseTemplate);
+    }
+  }
+});
+
 addHandler(function addSpecIfNoneSpecified(doc) {
   for (let node of nodesAndTemplates(doc)) {
     node.spec = node.spec || {};

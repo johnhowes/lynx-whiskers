@@ -97,7 +97,7 @@ function createNodeTemplate(node, value, isObject) {
     
     for (let template of alternateValueTemplates(node)) {
       if (isObject && template.value === null) {
-        output.push('"value": null');
+        output.push(tag(template, '"value": null'));
       } else {
         output.push(generate(template));
       }
