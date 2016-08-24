@@ -274,16 +274,217 @@ describe("dynamic lynx generation with handlebars", function () {
           hints: [ "text" ]
         }
       }
-    }  
+    }, {
+      description: "section: array of objects",
+      source: [
+        {
+          "~#people~array": {
+            firstName: "{{{firstName}}}",
+            lastName: "{{{lastName}}}"
+          }
+        }
+      ],
+      data: {
+        people: [
+          {
+            firstName: "Bill",
+            lastName: "Murray"
+          }, {
+            firstName: "Chubby",
+            lastName: "Checker"
+          }
+        ]
+      },
+      expected: {
+        value: [
+          {
+            firstName: "Bill",
+            lastName: "Murray"
+          },
+          {
+            firstName: "Chubby",
+            lastName: "Checker"
+          }
+        ],
+        spec: {
+          hints: [ "container" ],
+          children: {
+            hints: [ "container" ],
+            children: [
+              {
+                name: "firstName",
+                hints: [ "text" ]
+              }, {
+                name: "lastName",
+                hints: [ "text" ]
+              }
+            ]
+          }
+        }
+      }
+    }, {
+      description: "section: array of text",
+      source: [
+        {
+          "~#people~array": "{{{firstName}}}"
+        }
+      ],
+      data: {
+        people: [
+          {
+            firstName: "Bill",
+            lastName: "Murray"
+          }, {
+            firstName: "Chubby",
+            lastName: "Checker"
+          }
+        ]
+      },
+      expected: {
+        value: [ "Bill", "Chubby" ],
+        spec: {
+          hints: [ "container" ],
+          children: {
+            hints: [ "text" ]
+          }
+        }
+      }
+    }, {
+      description: "section: array of array",
+      source: [
+        {
+          "~#people~array": [
+            "{{{firstName}}}",
+            "{{{lastName}}}"
+          ]
+        }
+      ],
+      data: {
+        people: [
+          {
+            firstName: "Bill",
+            lastName: "Murray"
+          }, {
+            firstName: "Chubby",
+            lastName: "Checker"
+          }
+        ]
+      },
+      expected: {
+        value: [
+          [ "Bill", "Murray" ],
+          [ "Chubby", "Checker" ]
+        ],
+        spec: {
+          hints: [ "container" ],
+          children: {
+            hints: [ "container" ],
+            children: {
+              hints: [ "text" ]
+            }
+          }
+        }
+      }
+    }, {
+      description: "section: inline array of text",
+      source: [
+        {
+          "~#people~array~inline": "{{{firstName}}}"
+        }
+      ],
+      data: {
+        people: [
+          {
+            firstName: "Bill",
+            lastName: "Murray"
+          }, {
+            firstName: "Chubby",
+            lastName: "Checker"
+          }
+        ]
+      },
+      expected: {
+        value: [
+          {
+            value: "Bill",
+            spec: { hints: ["text"] }
+          },
+          {
+            value: "Chubby",
+            spec: { hints: ["text"] }
+          }
+        ],
+        spec: {
+          hints: [ "container" ]
+        }
+      }
+    }, {
+      description: "section: inline array of object",
+      source: [
+        {
+          "~#people~array~inline": {
+            firstName: "{{{firstName}}}",
+            lastName: "{{{lastName}}}"
+          }
+        }
+      ],
+      data: {
+        people: [
+          {
+            firstName: "Bill",
+            lastName: "Murray"
+          }, {
+            firstName: "Chubby",
+            lastName: "Checker"
+          }
+        ]
+      },
+      expected: {
+        value: [
+          {
+            firstName: "Bill",
+            lastName: "Murray",
+            spec: { 
+              hints: ["container"],
+              children: [
+                {
+                  name: "firstName",
+                  hints: [ "text" ]
+                }, {
+                  name: "lastName",
+                  hints: [ "text" ]
+                }
+              ]
+            }
+          }, {
+            firstName: "Chubby",
+            lastName: "Checker",
+            spec: { 
+              hints: ["container"],
+              children: [
+                {
+                  name: "firstName",
+                  hints: [ "text" ]
+                }, {
+                  name: "lastName",
+                  hints: [ "text" ]
+                }
+              ]
+            }
+          }
+        ],
+        spec: {
+          hints: [ "container" ]
+        }
+      }
+    }
   ];
   
   tests.forEach(function (test) {
     it("should generate a " + test.description, function () {
       var whiskersTemplate = whiskers.parse(test.source);
       var handlebarsTemplate = whiskers.generators.handlebars(whiskersTemplate);
-      // console.log(handlebarsTemplate);
       var output = Handlebars.compile(handlebarsTemplate)(test.data);
-      // console.log(output);
       var lynx = JSON.parse(output);
       lynx.should.deep.equal(test.expected);
     });

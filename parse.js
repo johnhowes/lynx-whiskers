@@ -20,7 +20,7 @@ let isDataProperty = (node) => !node.spec;
 function hasWhisker(key) {
   return function (node) {
     for (let whisker of node.whiskers) {
-      if (whisker.key === "zone") return true;
+      if (whisker.key === key) return true;
     }
   };
 }
@@ -454,6 +454,7 @@ function buildChildrenSpec(node) {
     }
   }
   
+  if (childrenSpec && Object.keys(childrenSpec).length === 0) return null;
   return childrenSpec;
 }
 
@@ -501,6 +502,11 @@ addHandler(function includePartials(doc) {
 
 function buildSpec(node) {
   let spec = JSON.parse(JSON.stringify(node.spec));
+  
+  // There's no need to have a name for an item in a data-bound array.
+  if (hasWhisker("array")(node)) {
+    delete spec.name;
+  }
   
   if (hasChildren(node)) {
     let childrenSpec = buildChildrenSpec(node);

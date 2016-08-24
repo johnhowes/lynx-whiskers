@@ -6,6 +6,7 @@ require("./build-spec");
 require("./data-properties");
 require("./templates");
 require("./handlebars");
+require("./state");
 require("./partials");
 
 describe("TODO", function () {
