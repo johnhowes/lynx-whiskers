@@ -37,7 +37,12 @@ app.use(async (ctx, next) => {
   
   var state = ctx.query.state ? ctx.query.state + ".js" : "default.js";
   var stateModule = path.join(ctx.directory, "~state", state);
-  var data = await require(stateModule)(ctx);
+  var data;
+  try {
+    data = await require(stateModule)(ctx);
+  } catch (e) {
+    data = {};
+  }
   decache(stateModule);
   
   var templateData = await ctx.read(ctx.template || "index.whiskers");

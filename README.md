@@ -573,7 +573,6 @@ a value must be marked with the `~inline` whisker to include its `spec` inline.
 #### Mixed Arrays
 
 ```YAML
-~:
   - ~header~inline: Colors
   - ~hint=color: Red
   - Green
@@ -915,3 +914,13 @@ main~section:
   header~header~label: Welcome
 footer: Copyright © John Howes, 2016
 ```
+
+### Realm
+
+> Notes: There should be one folder per resource. Each state of the resource
+should be represented with a .js file in a ~states folder. The state document should
+optionally reference its own template. If not, index.whiskers. Each template should
+have a realm, starting with a configured base realm, and adding the path to the
+folder and the name of the template (if not index). If a relative realm is specified,
+it should be completed with the configured base realm. If an absolute realm is specified,
+it should be used instead. Scope and for should use the same rules with baseRealm.
