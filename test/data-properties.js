@@ -85,5 +85,26 @@ describe("data properties", function () {
     should.exist(result.value.href.spec);
   });
   
+  it("should treat scope as a data property", function () {
+    var doc = {
+      "~container": {
+        scope: "http://example.com/"
+      }
+    };
+    
+    var result = whiskers.parse(doc);
+    should.not.exist(result.value.scope.spec);
+  });
+  
+  it("should treat context as a document-level data property", function () {
+    var doc = {
+      context: "../context/"
+    };
+    
+    var result = whiskers.parse(doc);
+    should.not.exist(result.value.context);
+    result.context.should.equal("../context/");
+  });
+  
   it("should treat a document realm property as a data property");
 });

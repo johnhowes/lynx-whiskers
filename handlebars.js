@@ -1,6 +1,7 @@
 /* jshint node: true */
 /* jshint esversion: 6 */
 "use strict";
+const generateDataKeyFromRelativeURL = require("./util").generateDataKeyFromRelativeURL;
 
 let util = require('util');
 
@@ -74,6 +75,12 @@ function* specTemplates(node) {
   }
 }
 
+function getURLValue(relativeOrAbsoluteURL) {
+  var dataKey = generateDataKeyFromRelativeURL(relativeOrAbsoluteURL);
+  if (dataKey) return "{{{" + dataKey + "}}}";
+  return relativeOrAbsoluteURL;
+}
+
 function createNodeTemplate(node, value, isObject) {
   let output = [];
   const templateType = getTemplateType(node);
@@ -108,10 +115,16 @@ function createNodeTemplate(node, value, isObject) {
   
   if (hasSpec(node)) {
     output.push('{');
+    if (node.realm) output.push('"realm":"' + node.realm + '",');
+    
+    if (node.context) {      
+      output.push('"context":"' + getURLValue(node.context) + '",');
+    }
+    
     if (isObject) output.push(createValueTemplate());
-    else output.push('"value": ' + createValueTemplate() + '');
+    else output.push('"value":' + createValueTemplate() + '');
     output.push(',');
-    output.push('"spec": ' + JSON.stringify(node['~spec']));
+    output.push('"spec":' + JSON.stringify(node['~spec']));
     output.push('}');
     if (isArrayDataSource) output.push("{{#unless @last}},{{/unless}}");
   } else {
@@ -122,8 +135,14 @@ function createNodeTemplate(node, value, isObject) {
 }
 
 function generateTextNodeTemplate(node) {
+  var value = node.value;
+  var urls = [ "href", "action", "src" ];
+  if (urls.indexOf(node.name) != -1) {
+    value = getURLValue(value);
+  }
+  
   const isLiteral = !!getWhisker(node, "literal");
-  var value = isLiteral ? node.value : JSON.stringify(node.value);
+  value = isLiteral ? value : JSON.stringify(value);
   return createNodeTemplate(node, value);
 }
 
@@ -146,63 +165,8 @@ function generateObjectNodeTemplate(node) {
     properties.push('"' + child.name + '": ' + childOutput);
   }
   
-  
-  
   return createNodeTemplate(node, properties.join(","), true);
 }
-
-// function generateObjectValueTemplate(template) {
-//   let properties = [];
-//   
-//   if (template.value === null) {
-//     properties.push('"value": null');
-//   } else {
-//     for (let p in template.value) {
-//       let child = template.value[p];
-//       let childOutput = generate(child);
-//       properties.push('"' + child.name + '": ' + childOutput);
-//     }
-//   }
-//   
-//   return tag(template, properties.join(","));
-// }
-// 
-// function generateObjectValue(node) {
-//   const templateType = getTemplateType(node);
-//   let output = [], properties = [];
-//   
-//   var isArray = isArraySection(node);
-//   
-//   if (!isArray) output.push('{');
-//   
-//   for (let p in node.value) {
-//     let child = node.value[p];
-//     let childOutput = generate(child);
-//     properties.push('"' + child.name + '": ' + childOutput);
-//   }
-//   
-//   var propertiesContent = properties.join(',');
-//   
-//   if (templateType === 'value') {
-//     if (isArray) propertiesContent = "{" + properties.join(',') + "}{{#unless @last}},{{/unless}}";
-//     output.push(tag(node, propertiesContent));
-//   } else {
-//     output.push(propertiesContent);
-//   }
-//   
-//   for (let template of alternateValueTemplates(node)) {
-//     output.push(generateObjectValueTemplate(template));
-//   }
-//   
-//   if (hasSpec(node)) {
-//     if (properties.length > 0) output.push(',');
-//     output.push('"spec": ' + JSON.stringify(node['~spec']));
-//   }
-//   
-//   if (!isArray) output.push('}');
-//   
-//   return output.join('');
-// }
 
 function generate(node) {
   let output = [];

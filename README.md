@@ -338,6 +338,18 @@ As are these markers:
   for~data: "http://example.com/place-to-be/"
 ```
 
+As are these scoped sub-windows:
+
+```YAML
+subWindow:
+  scope: "http://example.com/sub-process/"
+```
+
+```YAML
+subWindow:
+  scope~data: "http://example.com/sub-process/"
+```
+
 ##### ~data=false
 
 If you need to specify a normally unspecified property, you can use ~data=false:
@@ -923,4 +935,4 @@ optionally reference its own template. If not, index.whiskers. Each template sho
 have a realm, starting with a configured base realm, and adding the path to the
 folder and the name of the template (if not index). If a relative realm is specified,
 it should be completed with the configured base realm. If an absolute realm is specified,
-it should be used instead. Scope and for should use the same rules with baseRealm.
+it should be used instead. Scope and for should use the same rules with rootRealm.

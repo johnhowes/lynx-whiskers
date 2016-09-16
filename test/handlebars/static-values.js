@@ -113,6 +113,44 @@ describe("static lynx generation", function () {
             ]
           }
         }
+      }, {
+        description: "a document with a realm",
+        source: {
+          realm: "http://example.com/greeting/",
+          message: "Hello, World!"
+        },
+        expected: {
+          realm: "http://example.com/greeting/",
+          message: "Hello, World!",
+          spec: {
+            hints: [ "container" ],
+            children: [
+              {
+                name: "message",
+                hints: [ "text" ]
+              }
+            ]
+          }
+        }
+      }, {
+        description: "a document with context",
+        source: {
+          context: "http://example.com/greeting/",
+          message: "Hello, World!"
+        },
+        expected: {
+          context: "http://example.com/greeting/",
+          message: "Hello, World!",
+          spec: {
+            hints: [ "container" ],
+            children: [
+              {
+                name: "message",
+                hints: [ "text" ]
+              }
+            ]
+          }
+        }
       }
   ];
   

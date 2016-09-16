@@ -10,6 +10,7 @@ const baseHints = [ "text", "container", "form", "submit", "link", "content" ];
 const YAML = require("yamljs");
 const path = require("path");
 const fs = require("fs");
+const url = require("url");
 
 let addHandler = (fn) => handlers.push(fn);
 let hasBaseHint = (node) => node.spec.hints.some((h) => baseHints.indexOf(h) !== -1);
@@ -156,17 +157,17 @@ exports.resolvePartial = (name, options) => {
     return;
   }
   
-  var directory = path.dirname(options.location);
+  var directory = options.location;
   
-  while (directory) {
-    var partialLocation = path.join(directory, "~partials", "~" + name + ".whiskers");
+  while (directory && directory !== ".") {
+    var partialLocation = path.join(process.cwd(), directory, "~partials", "~" + name + ".whiskers");
     
     try {
       fs.accessSync(partialLocation);
       return {
         name: name,
         data: fs.readFileSync(partialLocation),
-        location: partialLocation
+        location: path.relative(process.cwd(), partialLocation)
       };
     } catch(e) { }
     
@@ -175,6 +176,39 @@ exports.resolvePartial = (name, options) => {
   
   throw new Error("Failed to resolve partial " + name);
 };
+
+addHandler(function handleRealm(doc) {
+  if (doc.value && doc.value.realm) {
+    doc.realm = doc.value.realm.value;
+    delete doc.value.realm;
+  }
+  
+  if (doc.options.rootRealm) {
+    if (doc.realm) {
+      if (doc.realm.indexOf("/") === 0) doc.realm = "." + doc.realm;
+      doc.realm = url.resolve(doc.options.rootRealm, doc.realm);
+      return;
+    } else if (doc.options.location) {
+      let parsedLocation = path.parse(doc.options.location);
+      let realm;
+      
+      if (parsedLocation.name === "index") {
+        realm = path.join("./", parsedLocation.dir, "/");
+      } else {
+        realm = path.join("./", parsedLocation.dir, parsedLocation.name, "/");
+      }
+
+      doc.realm = url.resolve(doc.options.rootRealm, realm);
+    }
+  }
+});
+
+addHandler(function handleContext(doc) {
+  if (doc.value && doc.value.context) {
+    doc.context = doc.value.context.value;
+    delete doc.value.context;
+  }
+});
 
 addHandler(function addImplicitNullInverse(doc) {
   for (let node of doc) {
@@ -445,9 +479,27 @@ addHandler(function handleData(doc) {
     let isMarkerData = node.name === "for";
     if (isMarkerData && hasHint(node.parent, "marker")) {
       delete node.spec;
+      node.value = resolveRealmURI(doc, node.value);
+    }
+    
+    let isScopeData = node.name === "scope";
+    if (isScopeData) {
+      delete node.spec;
+      node.value = resolveRealmURI(doc, node.value);
     }
   }
 });
+
+function resolveRealmURI(doc, absoluteOrRelativeURI) {
+  var parsed = url.parse(absoluteOrRelativeURI);
+  if (parsed.host) return absoluteOrRelativeURI;
+  
+  if (absoluteOrRelativeURI.indexOf("/") === 0) {
+    return url.resolve(doc.options.rootRealm, "." + absoluteOrRelativeURI);
+  }
+  
+  return url.resolve(doc.realm, absoluteOrRelativeURI);
+}
 
 function hasChildren(node) {
   return node.value && util.isObject(node.value);

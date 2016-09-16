@@ -515,4 +515,35 @@ describe("dynamic lynx generation with handlebars", function () {
       lynx.should.deep.equal(test.expected);
     });
   });
+  
+  it("should convert static relative URLs to handlebars expressions", function () {
+    var source = {
+      context: "../order",
+      link: {
+        href: "../order/line"
+      },
+      submit: {
+        action: "../../orders"
+      },
+      content: {
+        src: "../productImage.png"
+      }
+    };
+    
+    var data = {
+      orderURL: "/orders/order/1/",
+      orderLineURL: "/orders/order/1/line/2/",
+      ordersURL: "/orders/",
+      productImageURL: "/images/product-12345.png"
+    };
+    
+    var whiskersTemplate = whiskers.parse(source);
+    var handlebarsTemplate = whiskers.generators.handlebars(whiskersTemplate);
+    var output = Handlebars.compile(handlebarsTemplate)(data);
+    var lynx = JSON.parse(output);
+    lynx.context.should.equal(data.orderURL);
+    lynx.link.href.should.equal(data.orderLineURL);
+    lynx.submit.action.should.equal(data.ordersURL);
+    lynx.content.src.should.equal(data.productImageURL);
+  });
 });
