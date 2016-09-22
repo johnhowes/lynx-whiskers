@@ -24,15 +24,6 @@ describe("state generation", function () {
     output.should.deep.equal({});
   });
   
-  it("should not convert absolute URLs to state data", function () {
-    var doc = whiskers.parse({
-      href: "http://example.com/order/item/"
-    });
-    var output = whiskers.generators.state(doc);
-    
-    output.should.deep.equal({});
-  });
-  
   it("should convert href relative URLs to state data", function () {
     var doc = whiskers.parse({
       href: "./customer-data/"
@@ -77,5 +68,33 @@ describe("state generation", function () {
     var output = whiskers.generators.state(doc);
     
     output.rootURL.should.equal(doc.value.href.value);
+  });
+  
+  it("should add a data property for a simple handlebars expression", function () {
+    var doc = whiskers.parse("{{{name}}}");
+    
+    var output = whiskers.generators.state(doc);
+    
+    output.name.should.equal("Lorem ipsum dolor sit amet");
+  });
+  
+  it("should add a data property for multiple simple handlebars expressions", function () {
+    var doc = whiskers.parse("My name and serial number: {{{name}}} {{{serialNumber}}}");
+    
+    var output = whiskers.generators.state(doc);
+    
+    output.name.should.equal("Lorem ipsum dolor sit amet");
+    output.serialNumber.should.equal("Lorem ipsum dolor sit amet");
+  });
+  
+  it.only("should add an object context for a section", function () {
+    var doc = whiskers.parse({
+      "~#person": {
+        "name": "{{{name}}}"
+      }
+    });
+    
+    var output = whiskers.generators.state(doc);
+    output.person.name.should.equal("Lorem ipsum dolor sit amet");
   });
 });

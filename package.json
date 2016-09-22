@@ -12,7 +12,7 @@
   "author": "John Howes",
   "license": "ISC",
   "bin": {
-    "whiskers": "./cli.js"
+    "whiskers": "./lib/cli/index.js"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",

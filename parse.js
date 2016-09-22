@@ -11,6 +11,7 @@ const YAML = require("yamljs");
 const path = require("path");
 const fs = require("fs");
 const url = require("url");
+const nodesAndTemplates = require("./util").nodesAndTemplates;
 
 let addHandler = (fn) => handlers.push(fn);
 let hasBaseHint = (node) => node.spec.hints.some((h) => baseHints.indexOf(h) !== -1);
@@ -41,16 +42,6 @@ function* iterate() {
       for (let node of this.value[p]) {
         yield node;
       }
-    }
-  }
-}
-
-function* nodesAndTemplates(doc) {
-  for (let node of doc) {
-    yield node;
-    
-    for (let template of node.templates) {
-      yield template;
     }
   }
 }
@@ -215,22 +206,22 @@ addHandler(function addImplicitNullInverse(doc) {
     let sections = 0, inverses = 0, inline = 0;
     let section;
     for (let whisker of node.whiskers) {
-      if (whisker.key.indexOf("#") === 0) {
+      if (whisker.key.startsWith("#")) {
         section = whisker.key;
         sections += 1;
       }
       if (whisker.key === "inline") inline += 1;
-      if (whisker.key.indexOf("^") === 0) inverses += 1;
+      if (whisker.key.startsWith("^")) inverses += 1;
     }
     
     for (let template of node.templates) {
       for (let whisker of template.whiskers) {
-        if (whisker.key.indexOf("#") === 0) {
+        if (whisker.key.startsWith("#")) {
           section = whisker.key;
           sections += 1;
         }
         if (whisker.key === "inline") inline += 1;
-        if (whisker.key.indexOf("^") === 0) inverses += 1;
+        if (whisker.key.startsWith("^")) inverses += 1;
       }
     }
     

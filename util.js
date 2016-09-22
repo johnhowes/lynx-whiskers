@@ -6,6 +6,16 @@ const url = require("url");
 const path = require("path");
 const urlDataPattern = /[\w]+/g;
 
+exports.nodesAndTemplates = function* nodesAndTemplates(doc) {
+  for (let node of doc) {
+    yield node;
+    
+    for (let template of node.templates) {
+      yield template;
+    }
+  }
+};
+
 exports.generateDataKeyFromRelativeURL = function generateDataKeyFromRelativeURL(relativeOrAbsoluteURL) {
   var parsedURL = url.parse(relativeOrAbsoluteURL);
   if (parsedURL.host) return null;
@@ -35,5 +45,4 @@ exports.generateDataKeyFromRelativeURL = function generateDataKeyFromRelativeURL
   output.push("URL");
   
   return output.join("");
-}
-;
+};

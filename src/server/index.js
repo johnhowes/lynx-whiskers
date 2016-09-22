@@ -8,7 +8,14 @@ const path = require("path");
 const fs = require("fs");
 const url = require("url");
 const YAML = require("yamljs");
-require("babel-register");
+require("babel-register")({
+  "presets": [ 
+    "es2015"
+  ],
+  "plugins": [
+    "transform-async-to-generator"
+  ]
+});
 const decache = require("decache");
 const util = require("util");
 
@@ -39,7 +46,7 @@ app.use(async (ctx, next) => {
 
 app.use(async (ctx, next) => {
   try {
-    var config = await readFile("whiskers-config.yml");
+    var config = await readFile(".whiskers");
     ctx.settings = YAML.parse(config.toString());
   } catch(e) {
     console.error(e);
@@ -49,54 +56,36 @@ app.use(async (ctx, next) => {
   await next();
 });
 
-// function addStateLinks(lynxNode) {
-//   var value = lynxNode.value || lynxNode;
-//   
-//   if (!util.isObject(value)) return;
-//   
-//   // href, action (option: just change the href or action to the location of the states and add a scope)
-//   if (value.href) {
-//     value["~state"] = {
-//       value: "Here be your states!",
-//       spec: {
-//         hints: [ "text" ]
-//       }
-//     }
-//   }
-//   
-//   for (let p in value) {
-//     if (!value[p]) continue;
-//     addStateLinks(value[p]);
-//   }
-// }
-
 app.use(async (ctx, next) => {
   ctx.type = "application/lynx+json";
   
-  var templateData = await ctx.read(ctx.template || "index.whiskers");
+  var templateData = await ctx.read(ctx.template || "default.whiskers");
   var whiskersTemplate = whiskers.parse(YAML.parse(templateData.toString()), {
-    location: path.join(ctx.directory, ctx.template || "index.whiskers"),
-    rootRealm: ctx.settings.rootRealm
+    location: path.join(ctx.directory, ctx.template || "default.whiskers"),
+    rootRealm: ctx.settings.realm
   });
   var handlebarsTemplate = whiskers.generators.handlebars(whiskersTemplate);
   
   var state = ctx.query.state ? ctx.query.state + ".js" : "default.js";
   var stateModule = path.join(process.cwd(), ctx.directory, "~state", state);
+  console.log(stateModule);
   var data;
   try {
     data = await require(stateModule)(ctx);
+    console.log("Data", data);
   } catch (e) {
     data = whiskers.generators.state(whiskersTemplate);
+    console.error(e);
+    console.log("Default data", data);
   }
   decache(stateModule);
   
   var lynx = JSON.parse(Handlebars.compile(handlebarsTemplate)(data));
-  // addStateLinks(lynx);
   ctx.body = JSON.stringify(lynx);
   
   await next();
 });
 
 exports.serve = function (port) {
-  return app.listen(port);
+  return app.listen(port || 0);
 };
